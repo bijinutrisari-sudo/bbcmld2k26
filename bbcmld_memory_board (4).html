@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBCmld Memory Board</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg,#ffb7d5,#ffd6a5,#fdffb6,#caffbf,#9bf6ff,#bdb2ff);
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
+      min-height: 100vh;
+    }
+
+    .bubbly {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .card {
+      transition: .3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) rotate(1deg);
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .modal {
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #ffb7d5;
+      border-radius: 10px;
+    }
+
+    @keyframes floatHeart {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-150px) scale(1.5) rotate(25deg);
+      }
+    }
+
+    .floating-heart {
+      position: fixed;
+      font-size: 2rem;
+      pointer-events: none;
+      animation: floatHeart 1s ease-out forwards;
+      z-index: 99999;
+    }
+  </style>
+</head>
+<body class="text-slate-800 overflow-x-hidden">
+
+  <!-- LAYAR LOGIN -->
+  <div id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center bg-gradient-to-br from-pink-300 via-rose-200 to-sky-200 p-6 transition-all duration-300">
+    <div class="glass rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl text-center border-2 border-white/50">
+      <div class="text-6xl mb-3 animate-bounce">💖</div>
+      <h1 class="bubbly text-5xl text-pink-500 mb-3">BBCmld</h1>
+      <p class="text-slate-600 font-semibold mb-6">Masukkan passcode untuk masuk ke memory board</p>
+
+      <input id="passcodeInput" type="password" placeholder="Passcode admin/member" onkeypress="window.handleEnter(event)" class="w-full rounded-2xl px-4 py-4 border-2 border-pink-200 mb-5 text-center font-bold text-lg focus:outline-none focus:border-pink-400 transition-colors">
+
+      <button onclick="window.loginAccess()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-2xl bubbly text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+        Masuk 🚀
+      </button>
+
+      <p class="mt-4 text-xs text-slate-500">Passcode default: bbcmld2026</p>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="sticky top-0 z-50 glass px-6 py-4 flex justify-between items-center shadow-xl rounded-b-[2rem] mx-2 mt-2">
+    <div>
+      <h1 class="bubbly text-3xl font-bold text-pink-500 tracking-wide">BBCmld</h1>
+      <p class="text-xs text-slate-500 font-semibold">Belajar Bersama Cumlod 💖</p>
+    </div>
+
+    <div class="flex gap-3 items-center flex-wrap">
+      <button onclick="window.toggleMusic()" id="musicBtn" class="bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+        <span>▶</span> Music
+      </button>
+
+      <button onclick="window.scrollToVideo()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-md transition">
+        🎬 Video
+      </button>
+      <a href="https://drive.google.com/drive/folders/1Bbx3xo8I0EvWjaH9WrqR0pZ1eXpPfJEt" target="_blank" class="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-md transition">
+        Drive 📁
+      </a>
+
+      <button onclick="window.openAddModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-2xl text-sm font-bold shadow-md transition">
+        Upload 📸
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="text-center py-14 px-4 relative overflow-hidden">
+    <div class="absolute -top-20 -left-20 w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-40"></div>
+    <div class="absolute top-10 right-0 w-72 h-72 bg-sky-300 rounded-full blur-3xl opacity-40"></div>
+    
+    <span class="bg-white/80 px-4 py-2 rounded-full text-sm font-bold border border-pink-200 shadow-sm inline-block">
+      🎉 Ruang Memori Terlucu Kita! (Cloud Sync ☁️)
+    </span>
+
+    <h2 class="bubbly text-5xl md:text-6xl font-bold mt-5 leading-tight">
+      Kapsul Kenangan
+      <span class="text-pink-500 block md:inline">BBCmld</span>
+    </h2>
+
+    <p class="max-w-2xl mx-auto mt-4 text-slate-600 font-semibold text-lg">
+      Semua foto, video, dan kenangan kelompok tersimpan dan bisa dilihat bareng dari HP mana aja secara Realtime! ✨
+    </p>
+
+    <!-- STATS -->
+    <div class="grid grid-cols-3 gap-4 max-w-2xl mx-auto mt-10">
+      <div class="bg-white/80 rounded-3xl p-5 shadow-lg border border-white/60">
+        <div id="memoryCount" class="text-4xl font-bold text-pink-500 bubbly">0</div>
+        <div class="text-xs font-bold text-slate-500 mt-2">Kenangan</div>
+      </div>
+
+      <div class="bg-white/80 rounded-3xl p-5 shadow-lg border border-white/60">
+        <div id="likeCount" class="text-4xl font-bold text-orange-500 bubbly">0</div>
+        <div class="text-xs font-bold text-slate-500 mt-2">Likes</div>
+      </div>
+
+      <div class="bg-white/80 rounded-3xl p-5 shadow-lg border border-white/60">
+        <div id="memberCount" class="text-4xl font-bold text-sky-500 bubbly">12</div>
+        <div class="text-xs font-bold text-slate-500 mt-2">Sobat</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMBERS -->
+  <section class="max-w-7xl mx-auto px-6 mb-14">
+    <h2 class="bubbly text-3xl text-center mb-8">12 Member BBCmld ✨</h2>
+    <div id="memberContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5"></div>
+  </section>
+
+  <!-- MEMORY GALLERY -->
+  <section class="max-w-7xl mx-auto px-6 mb-14">
+    <div class="flex flex-wrap gap-3 justify-center mb-10">
+      <button onclick="window.filterGallery('all')" class="filterBtn bg-pink-500 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow transition">🎉 Semua</button>
+      <button onclick="window.filterGallery('Nugas')" class="filterBtn bg-white px-5 py-3 rounded-2xl font-bold text-sm shadow transition">📚 Nugas</button>
+      <button onclick="window.filterGallery('Wisuda')" class="filterBtn bg-white px-5 py-3 rounded-2xl font-bold text-sm shadow transition">🎓 Wisuda</button>
+      <button onclick="window.filterGallery('Makan')" class="filterBtn bg-white px-5 py-3 rounded-2xl font-bold text-sm shadow transition">🍜 Nongki</button>
+      <button onclick="window.filterGallery('Random')" class="filterBtn bg-white px-5 py-3 rounded-2xl font-bold text-sm shadow transition">🤡 Random</button>
+    </div>
+
+    <!-- GALLERY GRID -->
+    <div id="gallery" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+  </section>
+
+  <!-- VIDEO SECTION -->
+  <section id="videoSection" class="max-w-6xl mx-auto px-6 pb-20 hidden">
+    <div class="bg-white/90 rounded-3xl p-6 shadow-xl border border-white/55">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <div>
+          <h2 class="bubbly text-3xl">Video Memory Mode 🎬</h2>
+          <p class="text-sm text-slate-500">Galeri kenangan dengan background lagu favorit BBCmld</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="overflow-hidden rounded-3xl shadow-xl bg-white p-3">
+          <video controls class="w-full rounded-2xl h-80 object-cover">
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+          </video>
+          <p class="mt-3 font-bold px-1">Kenangan Nongki Bareng</p>
+        </div>
+
+        <div class="overflow-hidden rounded-3xl shadow-xl bg-white p-3">
+          <video controls class="w-full rounded-2xl h-80 object-cover">
+            <source src="https://www.w3schools.com/html/movie.mp4" type="video/mp4">
+          </video>
+          <p class="mt-3 font-bold px-1">Moment Random Kelompok</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPUP LIGHTBOX (KLIK FOTO) -->
+  <div id="lightboxModal" class="hidden fixed inset-0 z-[100] modal bg-black/80 flex items-center justify-center p-4" onclick="window.closeLightbox(event)">
+    <div class="relative max-w-4xl w-full flex flex-col items-center" onclick="event.stopPropagation()">
+      <button onclick="window.closeLightbox(null)" class="absolute -top-12 right-0 text-white text-4xl hover:text-pink-300 font-bold transition">&times;</button>
+      
+      <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-h-[85vh] flex flex-col md:flex-row">
+        <!-- Image Area -->
+        <div class="md:w-2/3 bg-black flex items-center justify-center min-h-[300px]">
+          <img id="lightboxImage" src="" alt="Kenangan" class="max-w-full max-h-[60vh] md:max-h-[80vh] object-contain">
+        </div>
+        <!-- Detail Area -->
+        <div class="md:w-1/3 p-6 flex flex-col justify-between bg-white overflow-y-auto">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <span id="lightboxCategory" class="text-xs bg-pink-100 text-pink-600 px-3 py-1 rounded-full font-bold">Category</span>
+              <span id="lightboxDate" class="text-xs text-slate-400 font-semibold">Date</span>
+            </div>
+            <h3 id="lightboxTitle" class="bubbly text-3xl text-slate-800 mb-3">Judul Kenangan</h3>
+            <p id="lightboxDesc" class="text-slate-600 text-sm leading-relaxed mb-6">Deskripsi atau cerita absurd di balik kenangan ini...</p>
+          </div>
+          
+          <div class="pt-4 border-t border-slate-100 flex gap-2">
+            <button id="lightboxLikeBtn" class="flex-1 bg-rose-50 hover:bg-rose-100 py-3 rounded-2xl text-rose-500 font-bold transition flex items-center justify-center gap-2">
+              <span class="text-xl">❤️</span> <span id="lightboxLikesCount">0</span> Likes
+            </button>
+            <button onclick="window.closeLightbox(null)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-bold transition">
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD MODAL -->
+  <div id="uploadModal" class="hidden fixed inset-0 z-50 modal bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl border-2 border-pink-100">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="bubbly text-3xl text-pink-500">Tambah Kenangan 📸</h2>
+        <button onclick="window.closeAddModal()" class="text-3xl font-bold text-slate-400 hover:text-slate-600 transition">&times;</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Judul Kenangan</label>
+          <input id="titleInput" type="text" placeholder="Misal: Selfie sebelum kuis mendadak" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Tanggal Kenangan</label>
+          <input id="dateInput" type="date" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Kategori</label>
+          <select id="categoryInput" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300 bg-white">
+            <option>Nugas</option>
+            <option>Wisuda</option>
+            <option>Makan</option>
+            <option>Random</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Upload Foto Kenangan</label>
+          <input id="imageInput" type="file" accept="image/*" class="w-full border-2 border-dashed border-slate-200 rounded-2xl px-4 py-3 bg-slate-50 text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Cerita Lucu / Deskripsi</label>
+          <textarea id="descInput" placeholder="Ceritakan keseruan atau kejadian konyolnya..." rows="3" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300"></textarea>
+        </div>
+
+        <button onclick="window.addMemory()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white py-3.5 rounded-2xl font-bold bubbly text-lg shadow-lg hover:scale-[1.02] transition-all">
+          Simpan Kenangan ke Cloud 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MEMBER MODAL -->
+  <div id="editMemberModal" class="hidden fixed inset-0 z-50 modal bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border-2 border-sky-100">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="bubbly text-3xl text-sky-500">Edit Member 💖</h2>
+        <button onclick="window.closeEditMemberModal()" class="text-3xl font-bold text-slate-400 hover:text-slate-600 transition">&times;</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Nama</label>
+          <input id="editMemberName" type="text" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-sky-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Tanggal Lahir</label>
+          <input id="editMemberBday" type="date" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-sky-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Upload Foto Profil (Opsional)</label>
+          <input id="editMemberPhoto" type="file" accept="image/*" class="w-full border-2 border-dashed border-slate-200 rounded-2xl px-4 py-3 bg-slate-50 text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
+          <p class="text-[10px] text-slate-400 mt-1">*Kosongkan jika tidak ingin mengubah foto</p>
+        </div>
+
+        <button onclick="window.saveEditedMember()" class="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white py-3.5 rounded-2xl font-bold bubbly text-lg shadow-lg hover:scale-[1.02] transition-all">
+          Simpan Profil ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM ALERT/NOTIFICATION MODAL -->
+  <div id="customAlert" class="hidden fixed inset-0 z-[1000] bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-2 border-pink-100 animate-scaleIn">
+      <div id="alertIcon" class="text-5xl mb-3">💡</div>
+      <p id="alertMessage" class="text-slate-700 font-semibold text-lg mb-6">Pemberitahuan</p>
+      <button onclick="window.closeAlert()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-2xl font-bold bubbly shadow-lg transition hover:brightness-110">
+        Oke, Mengerti!
+      </button>
+    </div>
+  </div>
+
+  <!-- CUSTOM CONFIRMATION MODAL -->
+  <div id="customConfirm" class="hidden fixed inset-0 z-[1000] bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-2 border-pink-100">
+      <div class="text-5xl mb-3">❓</div>
+      <p id="confirmMessage" class="text-slate-700 font-semibold text-lg mb-6">Apakah kamu yakin?</p>
+      <div class="flex gap-3">
+        <button id="confirmCancelBtn" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-2xl font-bold transition">
+          Batal
+        </button>
+        <button id="confirmOkBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-bold transition">
+          Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIO ELEMENT (Hindia - Ramai Sepi Bersama) -->
+  <audio id="bgMusic" loop>
+    <source src="./Hindia - Ramai Sepi Bersama Official Lyric Video.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- FIREBASE SCRIPTS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Konfigurasi Firebase dari akunmu
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLRVp3fQCRnfIa1zG8O1Fru51IBNwrZCQ",
+      authDomain: "bbcmld2026.firebaseapp.com",
+      projectId: "bbcmld2026",
+      storageBucket: "bbcmld-memory-board.appspot.com",
+      messagingSenderId: "148762512345",
+      appId: "1:766401509044:web:6ee67d198521fbb2aec9e1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentFilter = 'all';
+    let currentEditMemberIndex = null;
+
+    // Data Members (Disimpan lokal agar tidak rumit, fokus sync ke Gallery)
+    const members = JSON.parse(localStorage.getItem('bbcmld_members')) || [
+      {name:'Arya',birthday:'2004-01-01'},
+      {name:'Akaz',birthday:'2004-02-02'},
+      {name:'Arip',birthday:'2004-03-03'},
+      {name:'Amad',birthday:'2004-04-04'},
+      {name:'Faqih',birthday:'2004-05-05'},
+      {name:'Feriska',birthday:'2004-06-06'},
+      {name:'Naiya',birthday:'2004-07-07'},
+      {name:'Yelira',birthday:'2004-08-08'},
+      {name:'Indah',birthday:'2004-09-09'},
+      {name:'Tyas',birthday:'2004-10-10'},
+      {name:'Elga',birthday:'2004-11-11'},
+      {name:'Lisa',birthday:'2004-12-12'}
+    ];
+
+    let memories = [];
+
+    // MENGAMBIL DATA GALERI DARI CLOUD SECARA REALTIME
+    const q = query(collection(db, "memories"), orderBy("date", "desc"));
+    onSnapshot(q, (snapshot) => {
+      memories = [];
+      snapshot.forEach((docu) => {
+        memories.push({ id: docu.id, ...docu.data() });
+      });
+      renderGallery();
+    });
+
+    // FUNGSI RENDER MEMBERS
+    function renderMembers() {
+      const container = document.getElementById('memberContainer');
+      container.innerHTML = '';
+      members.forEach((m, index) => {
+        const avatarSrc = m.image ? m.image : `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${m.name}`;
+        container.innerHTML += `
+          <div class="bg-white/80 rounded-3xl p-4 shadow-lg text-center border border-white/60 hover:-translate-y-1 transition duration-200">
+            <img src="${avatarSrc}" class="w-20 h-20 mx-auto mb-3 rounded-full bg-pink-50 p-1 object-cover">
+            <h3 class="font-bold bubbly text-xl text-pink-600">${m.name}</h3>
+            <p class="text-xs text-slate-500 mt-1">🎂 ${m.birthday}</p>
+            <button onclick="window.editMember(${index})" class="mt-3 bg-sky-100 hover:bg-sky-200 text-sky-600 px-4 py-1.5 rounded-xl text-xs font-bold transition">Edit</button>
+          </div>
+        `;
+      });
+      document.getElementById('memberCount').innerText = members.length;
+    }
+
+    // FUNGSI RENDER GALERI DARI CLOUD
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+
+      const filtered = currentFilter === 'all'
+        ? memories
+        : memories.filter(m => m.category === currentFilter);
+
+      filtered.forEach((item) => {
+        gallery.innerHTML += `
+          <div class="card bg-white rounded-3xl shadow-xl overflow-hidden p-4 flex flex-col justify-between border border-white">
+            <div onclick="window.openLightbox('${item.id}')" class="cursor-pointer group relative overflow-hidden rounded-2xl">
+              <img src="${item.image}" class="w-full h-72 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300" />
+              <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span class="bg-white/90 text-slate-800 font-bold px-4 py-2 rounded-full text-sm shadow-md">Lihat Foto 🔍</span>
+              </div>
+            </div>
+            <div class="mt-4 flex-grow flex flex-col justify-between">
+              <div>
+                <span class="text-xs bg-pink-100 text-pink-600 px-3 py-1 rounded-full font-bold">${item.category}</span>
+                <h3 onclick="window.openLightbox('${item.id}')" class="bubbly text-2xl mt-3 text-slate-800 cursor-pointer hover:text-pink-500 transition-colors">${item.title}</h3>
+                <p class="text-sm text-slate-500 mt-2 line-clamp-2">${item.desc}</p>
+                <p class="text-xs text-slate-400 mt-2">📅 ${item.date}</p>
+              </div>
+              <div class="flex gap-2 mt-5">
+                <button onclick="window.likeMemory('${item.id}', ${item.likes}, event)" class="flex-1 bg-rose-50 hover:bg-rose-100 active:scale-95 py-2.5 rounded-2xl text-rose-500 font-bold transition flex items-center justify-center gap-1">
+                  ❤️ <span>${item.likes}</span>
+                </button>
+                <button onclick="window.deleteMemory('${item.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 px-4 rounded-2xl font-bold transition">
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      updateStats();
+    }
+
+    // FUNGSI UPDATE STATS (LIKE & POSTS CLOUD)
+    function updateStats() {
+      document.getElementById('memoryCount').innerText = memories.length;
+      let totalLikes = memories.reduce((a, b) => a + (b.likes || 0), 0);
+      document.getElementById('likeCount').innerText = totalLikes;
+    }
+
+    // FUNGSI TAMBAH KE CLOUD
+    window.addMemory = async () => {
+      const title = document.getElementById('titleInput').value.trim();
+      const date = document.getElementById('dateInput').value;
+      const category = document.getElementById('categoryInput').value;
+      const imageFile = document.getElementById('imageInput').files[0];
+      const desc = document.getElementById('descInput').value.trim();
+
+      if(!title) return window.showAlert('Silakan tulis judul kenangannya dulu ya! 🥺', '✏️');
+      if(!date) return window.showAlert('Jangan lupa masukkan tanggal momen tersebut! 📅', '📅');
+      if(!imageFile) return window.showAlert('Upload foto dulu ya biar kenangannya abadi! 📸', '😭');
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        await addDoc(collection(db, "memories"), {
+          title, date, category, image: e.target.result, desc: desc || 'Tidak ada deskripsi tambahan.', likes: 0
+        });
+        window.closeAddModal();
+        window.showAlert('Kenangan baru berhasil disimpan ke Cloud! 🎉', '🚀');
+        document.getElementById('titleInput').value = '';
+        document.getElementById('dateInput').value = '';
+        document.getElementById('imageInput').value = '';
+        document.getElementById('descInput').value = '';
+      }
+      reader.readAsDataURL(imageFile);
+    };
+
+    // FUNGSI LIKE DI CLOUD
+    window.likeMemory = async (id, currentLikes, event) => {
+      if(event && event.clientX) window.createFloatingHearts(event.clientX, event.clientY);
+      await updateDoc(doc(db, "memories", id), { likes: currentLikes + 1 });
+    };
+
+    // FUNGSI HAPUS DI CLOUD
+    window.deleteMemory = (id) => {
+      window.showConfirm('Hapus kenangan berharga ini? 😭 Semua member akan kehilangannya.', async () => {
+        await deleteDoc(doc(db, "memories", id));
+        window.showAlert('Kenangan berhasil dihapus dari Cloud.', '🗑️');
+      });
+    };
+
+    // FUNGSI LIGHTBOX
+    window.openLightbox = (id) => {
+      const item = memories.find(m => m.id === id);
+      if (!item) return;
+      document.getElementById('lightboxImage').src = item.image;
+      document.getElementById('lightboxCategory').innerText = item.category;
+      document.getElementById('lightboxDate').innerText = "📅 " + item.date;
+      document.getElementById('lightboxTitle').innerText = item.title;
+      document.getElementById('lightboxDesc').innerText = item.desc;
+      document.getElementById('lightboxLikesCount').innerText = item.likes;
+      
+      const likeBtn = document.getElementById('lightboxLikeBtn');
+      likeBtn.onclick = function(event) {
+        window.likeMemory(id, item.likes, event);
+      };
+
+      document.getElementById('lightboxModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeLightbox = (event) => {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('lightboxModal').classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+
+    // UI & HELPER FUNCTIONS
+    window.showAlert = (message, icon = "💡") => {
+      document.getElementById('alertIcon').innerText = icon;
+      document.getElementById('alertMessage').innerText = message;
+      document.getElementById('customAlert').classList.remove('hidden');
+    };
+
+    window.closeAlert = () => document.getElementById('customAlert').classList.add('hidden');
+
+    window.showConfirm = (message, onConfirm) => {
+      document.getElementById('confirmMessage').innerText = message;
+      document.getElementById('customConfirm').classList.remove('hidden');
+      
+      const okBtn = document.getElementById('confirmOkBtn');
+      const cancelBtn = document.getElementById('confirmCancelBtn');
+      const clearListeners = () => { okBtn.replaceWith(okBtn.cloneNode(true)); cancelBtn.replaceWith(cancelBtn.cloneNode(true)); };
+
+      document.getElementById('confirmOkBtn').addEventListener('click', () => {
+        document.getElementById('customConfirm').classList.add('hidden');
+        onConfirm();
+      }, { once: true });
+
+      document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+        document.getElementById('customConfirm').classList.add('hidden');
+      }, { once: true });
+    };
+
+    window.createFloatingHearts = (x, y) => {
+      const heartEmojis = ['❤️', '💖', '✨', '💕', '🥰'];
+      for (let i = 0; i < 6; i++) {
+        const heart = document.createElement('div');
+        heart.innerHTML = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        heart.className = 'floating-heart';
+        const randomX = (Math.random() - 0.5) * 60; 
+        const randomY = (Math.random() - 0.5) * 60;
+        heart.style.left = (x + randomX - 20) + 'px';
+        heart.style.top = (y + randomY - 20) + 'px';
+        heart.style.animationDuration = (0.8 + Math.random() * 0.5) + 's';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1500);
+      }
+    };
+
+    // EDIT MEMBERS (LOKAL)
+    window.editMember = (index) => {
+      currentEditMemberIndex = index;
+      const m = members[index];
+      document.getElementById('editMemberName').value = m.name;
+      document.getElementById('editMemberBday').value = m.birthday || '';
+      document.getElementById('editMemberPhoto').value = ''; 
+      document.getElementById('editMemberModal').classList.remove('hidden');
+    };
+
+    window.closeEditMemberModal = () => document.getElementById('editMemberModal').classList.add('hidden');
+
+    window.saveEditedMember = () => {
+      const name = document.getElementById('editMemberName').value.trim();
+      const bday = document.getElementById('editMemberBday').value;
+      const file = document.getElementById('editMemberPhoto').files[0];
+
+      if (!name) return window.showAlert('Nama tidak boleh kosong! 🥺', '❌');
+
+      members[currentEditMemberIndex].name = name;
+      members[currentEditMemberIndex].birthday = bday;
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          members[currentEditMemberIndex].image = e.target.result;
+          localStorage.setItem('bbcmld_members', JSON.stringify(members));
+          renderMembers();
+          window.closeEditMemberModal();
+          window.showAlert('Profil member berhasil diupdate! ✨', '😎');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        localStorage.setItem('bbcmld_members', JSON.stringify(members));
+        renderMembers();
+        window.closeEditMemberModal();
+        window.showAlert('Profil member berhasil diupdate! ✨', '😎');
+      }
+    };
+
+    window.filterGallery = (category) => {
+      currentFilter = category;
+      document.querySelectorAll('.filterBtn').forEach(btn => {
+        if(btn.innerText.includes(category) || (category === 'all' && btn.innerText.includes('Semua'))) {
+          btn.classList.remove('bg-white', 'text-slate-800');
+          btn.classList.add('bg-pink-500', 'text-white');
+        } else {
+          btn.classList.remove('bg-pink-500', 'text-white');
+          btn.classList.add('bg-white', 'text-slate-800');
+        }
+      });
+      renderGallery();
+    };
+
+    window.openAddModal = () => {
+      const dateInput = document.getElementById('dateInput');
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+      document.getElementById('uploadModal').classList.remove('hidden');
+    };
+
+    window.closeAddModal = () => document.getElementById('uploadModal').classList.add('hidden');
+
+    window.toggleMusic = () => {
+      const music = document.getElementById('bgMusic');
+      const btn = document.getElementById('musicBtn');
+      if(music.paused){
+        music.play().then(() => { btn.innerHTML = '<span>⏸</span> Music'; })
+        .catch(err => window.showAlert('Interaksi pertama diperlukan agar browser dapat memutar audio.', '🎵'));
+      } else {
+        music.pause();
+        btn.innerHTML = '<span>▶</span> Music';
+      }
+    };
+
+    window.scrollToVideo = () => {
+      const section = document.getElementById('videoSection');
+      section.classList.remove('hidden');
+      section.scrollIntoView({behavior:'smooth'});
+    };
+
+    window.loginAccess = () => {
+      const pass = document.getElementById('passcodeInput').value.trim();
+      if(pass === 'bbcmld2026'){
+        document.getElementById('loginScreen').style.opacity = '0';
+        setTimeout(()=>{ document.getElementById('loginScreen').style.display = 'none'; }, 300);
+        localStorage.setItem('bbcmld_logged_in','true');
+        setTimeout(() => window.toggleMusic(), 500);
+      } else {
+        window.showAlert('Passcode salah, silakan coba lagi! 😭', '🔒');
+      }
+    };
+
+    window.handleEnter = (event) => { if(event.key === 'Enter') window.loginAccess(); };
+
+    window.onload = () => {
+      if(localStorage.getItem('bbcmld_logged_in') === 'true'){
+        document.getElementById('loginScreen').style.display = 'none';
+      }
+      renderMembers();
+    };
+
+  </script>
+</body>
+</html>
