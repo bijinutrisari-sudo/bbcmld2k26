@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBCmld Memory Board</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg,#ffb7d5,#ffd6a5,#fdffb6,#caffbf,#9bf6ff,#bdb2ff);
+      background-size: 400% 400%;
+      animation: gradientMove 12s ease infinite;
+      min-height: 100vh;
+    }
+
+    .bubbly {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .card {
+      transition: .3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) rotate(1deg);
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .modal {
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #ffb7d5;
+      border-radius: 10px;
+    }
+
+    @keyframes floatHeart {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-150px) scale(1.5) rotate(25deg);
+      }
+    }
+
+    .floating-heart {
+      position: fixed;
+      font-size: 2rem;
+      pointer-events: none;
+      animation: floatHeart 1s ease-out forwards;
+      z-index: 99999;
+    }
+
+    /* CSS Marquee Slider Kenangan */
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .marquee-wrapper {
+      display: flex;
+      width: max-content;
+      animation: marquee 35s linear infinite;
+    }
+
+    .marquee-wrapper:hover {
+      animation-play-state: paused;
+    }
+
+    /* CD spinning animation for music player */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spinning-cd {
+      animation: spin 6s linear infinite;
+    }
+    .paused-cd {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="text-slate-800 overflow-x-hidden">
+
+  <!-- LAYAR LOGIN -->
+  <div id="loginScreen" class="fixed inset-0 z-[999] flex items-center justify-center bg-gradient-to-br from-pink-300 via-rose-200 to-sky-200 p-6 transition-all duration-300">
+    <div class="glass rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl text-center border-2 border-white/50">
+      <div class="text-6xl mb-3 animate-bounce">💖</div>
+      <h1 class="bubbly text-5xl text-pink-500 mb-3">BBCmld</h1>
+      <p class="text-slate-600 font-semibold mb-6">Masukkan passcode kamu untuk masuk ke memory board</p>
+
+      <input id="passcodeInput" type="password" placeholder="Passcode (bbcmld2026 atau nama kamu)" onkeypress="window.handleEnter(event)" class="w-full rounded-2xl px-4 py-4 border-2 border-pink-200 mb-5 text-center font-bold text-lg focus:outline-none focus:border-pink-400 transition-colors">
+
+      <button onclick="window.loginAccess()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-2xl bubbly text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+        Masuk 🚀
+      </button>
+
+      <div class="mt-4 bg-white/50 p-3 rounded-xl border border-pink-100 text-[11px] text-slate-500 text-left space-y-1">
+        <p class="font-bold text-center text-pink-600 mb-1">🔑 Info Passcode Akses:</p>
+        <p>• <b>Admin / Semua:</b> <code class="bg-white px-1 py-0.5 rounded text-pink-500">bbcmld2026</code> (Tampil 12 member)</p>
+        <p>• <b>Sobat BBCmld:</b> Gunakan <code class="bg-white px-1 py-0.5 rounded text-pink-500">[nama]2026</code> (Profil disembunyikan selain kamu)</p>
+        <p class="italic text-[9px] text-center text-slate-400">Contoh: arya2026, tyas2026, lisa2026, dll (Huruf kecil semua)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOMBOL FLOATING PEMBUKA SIDEBAR (Hanya muncul jika sidebar desktop tertutup) -->
+  <button id="sidebarTriggerBtn" onclick="window.toggleSidebar()" class="fixed top-4 left-4 z-40 bg-pink-500 hover:bg-pink-600 text-white p-3.5 rounded-2xl shadow-xl transition-all duration-300 flex items-center gap-2 font-bold text-xs hover:scale-105 active:scale-95 scale-0 opacity-0 pointer-events-none">
+    <span>🌸</span> Menu & Profil
+  </button>
+
+  <!-- CONTAINER UTAMA TATA LETAK SPLIT (SIDEBAR & MAIN AREA) -->
+  <div class="flex flex-col lg:flex-row min-h-screen">
+
+    <!-- TOMBOL RESPONSIVE MOBILE UNTUK MENUNJUKKAN/MENYEMBUNYIKAN SIDEBAR -->
+    <div class="lg:hidden glass sticky top-0 z-40 px-6 py-4 flex justify-between items-center shadow-lg rounded-b-2xl mx-2 mt-2">
+      <div>
+        <h1 class="bubbly text-2xl font-bold text-pink-500">BBCmld</h1>
+        <p id="mobileUserGreeting" class="text-[10px] text-slate-500 font-bold">Halo, Sobat! 👋</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button onclick="window.toggleSidebar()" class="bg-pink-500 text-white p-2 px-3 rounded-xl text-sm font-bold shadow transition hover:bg-pink-600">
+          🍔 Menu / Profil
+        </button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR / NAVBAR KIRI (TRANSITION SLIDE & TOGGLEABLE) -->
+    <aside id="sidebarPanel" class="fixed inset-y-0 left-0 w-80 glass z-50 shadow-2xl lg:shadow-md border-r border-white/40 overflow-y-auto p-6 transition-transform duration-300 ease-in-out flex flex-col">
+      
+      <!-- HEADER SIDEBAR (CLOSE BUTTON UNTUK DESKTOP & MOBILE) -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="bubbly text-4xl font-bold text-pink-500 tracking-wide">BBCmld</h1>
+          <p class="text-[11px] text-slate-500 font-semibold tracking-wider">Belajar Bersama Cumlod 💖</p>
+        </div>
+        <button onclick="window.toggleSidebar()" class="text-2xl font-bold text-slate-400 hover:text-pink-500 transition px-2 py-1 rounded-lg hover:bg-pink-50" title="Tutup Menu">
+          &times;
+        </button>
+      </div>
+
+      <!-- SEKTOR DETAIL USER PROFILE UTAMA -->
+      <div id="sidebarUserProfile" class="bg-white/95 rounded-3xl p-5 shadow-md border border-white flex flex-col items-center text-center mb-6 relative">
+        <div class="relative group">
+          <img id="sidebarUserAvatar" src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Admin" class="w-24 h-24 rounded-full bg-pink-50 p-1.5 object-cover shadow-inner">
+          <button id="sidebarEditProfileBtn" class="absolute bottom-0 right-0 bg-sky-400 hover:bg-sky-500 text-white rounded-full p-2 text-xs shadow-md transition-all active:scale-95" title="Edit Profil">
+            ✏️
+          </button>
+        </div>
+        <h3 id="sidebarUserName" class="bubbly text-2xl text-pink-600 mt-3 font-bold truncate max-w-full">Admin</h3>
+        <p id="sidebarUserBday" class="text-xs text-slate-500 mt-1">🎂 -</p>
+        <div id="sidebarBadge" class="mt-2 text-[10px] bg-pink-100 text-pink-600 px-3 py-1 rounded-full font-bold">Admin Level 👑</div>
+      </div>
+
+      <!-- KONTROL MUSIK PANEL TERINTEGRASI -->
+      <div class="bg-gradient-to-br from-pink-50 to-rose-100 rounded-3xl p-4 shadow-sm border border-pink-100/60 mb-6 flex flex-col">
+        <div class="flex items-center gap-3">
+          <div class="relative w-12 h-12 flex-shrink-0 bg-white rounded-full shadow-md flex items-center justify-center overflow-hidden">
+            <span id="musicDiscIcon" class="text-2xl spinning-cd paused-cd">💿</span>
+          </div>
+          <div class="overflow-hidden flex-grow">
+            <span class="text-[9px] bg-pink-200 text-pink-700 px-2 py-0.5 rounded-full font-bold tracking-widest uppercase">Now Playing</span>
+            <p id="currentSongTitle" class="text-xs font-bold text-slate-700 truncate mt-1">Sedang tidak memutar lagu</p>
+          </div>
+        </div>
+        
+        <!-- PLAYER ACTION CONTROLS -->
+        <div class="flex items-center justify-between gap-1 mt-4">
+          <button onclick="window.toggleMusic()" id="musicBtn" class="flex-1 bg-white hover:bg-pink-100 text-pink-600 font-bold py-2 px-3 rounded-2xl text-xs shadow-sm transition flex items-center justify-center gap-1">
+            <span>▶</span> Putar
+          </button>
+          <button onclick="window.togglePlaylistDropdown()" class="bg-white hover:bg-pink-100 text-pink-600 font-bold py-2 px-3 rounded-2xl text-xs shadow-sm transition">
+            🎵 Lagu ▼
+          </button>
+        </div>
+
+        <!-- DROPDOWN PLAYLIST -->
+        <div id="playlistDropdown" class="hidden mt-3 max-h-48 overflow-y-auto space-y-1 bg-white/90 p-2 rounded-2xl border border-pink-100 shadow-inner">
+          <div id="songListContainer" class="space-y-1">
+            <!-- Diisi secara dinamis oleh JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGASI & AKSI CEPAT -->
+      <div class="space-y-2 flex-grow">
+        <button onclick="window.openAddModal()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-2xl text-sm shadow transition flex items-center justify-center gap-2">
+          📸 Upload Kenangan Baru
+        </button>
+        <button onclick="window.scrollToVideo()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-4 rounded-2xl text-sm shadow transition flex items-center justify-center gap-2">
+          🎬 Cari Video Memori
+        </button>
+        <a href="https://drive.google.com/drive/folders/1Bbx3xo8I0EvWjaH9WrqR0pZ1eXpPfJEt" target="_blank" class="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 px-4 rounded-2xl text-sm shadow transition flex items-center justify-center gap-2 text-center">
+          📁 Folder Google Drive
+        </a>
+      </div>
+
+      <!-- FOOTER SIDEBAR (LOGOUT & COPYRIGHT) -->
+      <div class="pt-4 border-t border-slate-200 mt-6 space-y-2">
+        <button onclick="window.logoutAccess()" class="w-full bg-rose-500 hover:bg-rose-600 text-white py-2.5 rounded-2xl text-xs font-bold shadow transition flex items-center justify-center gap-1.5">
+          🚪 Keluar Akun (Logout)
+        </button>
+        <p class="text-[10px] text-slate-400 text-center font-bold">BBCmld Kapsul Kenangan © 2026</p>
+      </div>
+
+    </aside>
+
+    <!-- AREA KONTEN UTAMA (SISI KANAN - MEMILIKI TRANSISI PADDING UNTUK SIDEBAR) -->
+    <main id="mainContent" class="flex-grow w-full min-h-screen lg:pl-80 flex flex-col p-4 md:p-8 transition-all duration-300 ease-in-out">
+
+      <!-- HERO SECTION -->
+      <section class="text-center py-10 px-4 relative overflow-hidden">
+        <div class="absolute -top-20 -left-20 w-72 h-72 bg-pink-300 rounded-full blur-3xl opacity-40"></div>
+        <div class="absolute top-10 right-0 w-72 h-72 bg-sky-300 rounded-full blur-3xl opacity-40"></div>
+        
+        <span class="bg-white/80 px-4 py-2 rounded-full text-xs font-bold border border-pink-200 shadow-sm inline-block">
+          🎉 Ruang Memori Terlucu Kita! (Cloud Sync ☁️)
+        </span>
+
+        <h2 class="bubbly text-4xl md:text-5xl font-bold mt-5 leading-tight animate-bounce">
+          Kapsul Kenangan
+          <span class="text-pink-500 block md:inline">BBCmld</span>
+        </h2>
+
+        <p class="max-w-xl mx-auto mt-4 text-slate-600 font-semibold text-sm md:text-base">
+          Semua foto, video, dan kenangan kelompok tersimpan dan bisa dilihat bareng dari HP mana aja secara Realtime! ✨
+        </p>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-3 gap-4 max-w-xl mx-auto mt-8">
+          <div class="bg-white/85 rounded-2xl p-4 shadow-md border border-white">
+            <div id="memoryCount" class="text-2xl md:text-3xl font-bold text-pink-500 bubbly">0</div>
+            <div class="text-[10px] font-bold text-slate-500 mt-1">Kenangan</div>
+          </div>
+
+          <div class="bg-white/85 rounded-2xl p-4 shadow-md border border-white">
+            <div id="likeCount" class="text-2xl md:text-3xl font-bold text-orange-500 bubbly">0</div>
+            <div class="text-[10px] font-bold text-slate-500 mt-1">Likes</div>
+          </div>
+
+          <div class="bg-white/85 rounded-2xl p-4 shadow-md border border-white">
+            <div id="memberCount" class="text-2xl md:text-3xl font-bold text-sky-500 bubbly">12</div>
+            <div class="text-[10px] font-bold text-slate-500 mt-1">Sobat</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEKTOR ALL MEMBERS (Hanya muncul jika admin, atau disembunyikan jika personal login) -->
+      <section id="membersSection" class="max-w-6xl mx-auto w-full px-2 mb-10">
+        <h2 id="memberHeader" class="bubbly text-2xl text-center mb-6">12 Member BBCmld ✨</h2>
+        <div id="memberContainer" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+      </section>
+
+      <!-- PHOTO MARQUEE SLIDER (BERGULIR KANAN KE LIRI) -->
+      <section class="w-full mb-10 overflow-hidden relative py-4 bg-white/40 backdrop-blur-sm border-y border-white/50 rounded-2xl">
+        <div class="text-center mb-3">
+          <span class="bubbly text-sm font-bold text-pink-600">⚡ Kilas Balik Memori Kita ⚡</span>
+        </div>
+        <div class="relative w-full overflow-hidden">
+          <div id="marqueeContainer" class="marquee-wrapper gap-4 px-4">
+            <div class="text-slate-500 font-semibold py-4 text-center w-full text-xs">Memuat kenangan indah... 💕</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEMORY GALLERY SECTION -->
+      <section class="max-w-6xl mx-auto w-full px-2 mb-10">
+        <div class="flex flex-wrap gap-2 justify-center mb-8">
+          <button onclick="window.filterGallery('all')" class="filterBtn bg-pink-500 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow transition">🎉 Semua</button>
+          <button onclick="window.filterGallery('Nugas')" class="filterBtn bg-white px-4 py-2.5 rounded-xl font-bold text-xs shadow transition">📚 Nugas</button>
+          <button onclick="window.filterGallery('Wisuda')" class="filterBtn bg-white px-4 py-2.5 rounded-xl font-bold text-xs shadow transition">🎓 Wisuda</button>
+          <button onclick="window.filterGallery('Makan')" class="filterBtn bg-white px-4 py-2.5 rounded-xl font-bold text-xs shadow transition">🍜 Nongki</button>
+          <button onclick="window.filterGallery('Random')" class="filterBtn bg-white px-4 py-2.5 rounded-xl font-bold text-xs shadow transition">🤡 Random</button>
+        </div>
+
+        <!-- GALLERY GRID -->
+        <div id="gallery" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <!-- PAGINATION SYSTEM (Untuk melihat selengkapnya halaman 1, 2, dst jika > 6 foto) -->
+        <div id="paginationContainer" class="mt-8 flex justify-center items-center gap-2 hidden">
+          <!-- Tombol halaman akan di-inject dinamis dari JS -->
+        </div>
+      </section>
+
+      <!-- VIDEO SECTION -->
+      <section id="videoSection" class="max-w-6xl mx-auto w-full px-2 pb-16">
+        <div class="bg-white/90 rounded-3xl p-5 md:p-7 shadow-xl border border-white/55">
+          <div class="mb-5">
+            <h2 class="bubbly text-2xl md:text-3xl text-pink-600">Video Memory Mode 🎬</h2>
+            <p class="text-xs text-slate-500 mt-1">Momen bergerak paling kocak dan seru yang berhasil direkam</p>
+          </div>
+
+          <!-- CONTAINER DYNAMIC VIDEO DARI CLOUD -->
+          <div id="videoContainer" class="grid md:grid-cols-2 gap-6">
+            <div class="text-slate-500 font-semibold text-center py-10 col-span-2 text-xs">
+              Memuat video-video seru... 🎬
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- POPUP LIGHTBOX (KLIK FOTO + KOMENTAR) -->
+  <div id="lightboxModal" class="hidden fixed inset-0 z-[100] modal bg-black/80 flex items-center justify-center p-4" onclick="window.closeLightbox(event)">
+    <div class="relative max-w-5xl w-full flex flex-col items-center" onclick="event.stopPropagation()">
+      <button onclick="window.closeLightbox(null)" class="absolute -top-12 right-0 text-white text-4xl hover:text-pink-300 font-bold transition">&times;</button>
+      
+      <div class="bg-white rounded-3xl overflow-hidden shadow-2xl w-full max-h-[90vh] md:max-h-[85vh] flex flex-col md:flex-row">
+        <!-- Image Area -->
+        <div class="md:w-3/5 bg-black flex items-center justify-center min-h-[250px] relative">
+          <img id="lightboxImage" src="" alt="Kenangan" class="max-w-full max-h-[50vh] md:max-h-[80vh] object-contain">
+        </div>
+        <!-- Detail & Comments Area -->
+        <div class="md:w-2/5 p-6 flex flex-col justify-between bg-white overflow-hidden max-h-[50vh] md:max-h-[85vh]">
+          <div class="overflow-y-auto flex-grow space-y-4 pr-1">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span id="lightboxCategory" class="text-xs bg-pink-100 text-pink-600 px-3 py-1 rounded-full font-bold">Category</span>
+                <span id="lightboxDate" class="text-xs text-slate-400 font-semibold">Date</span>
+              </div>
+              <h3 id="lightboxTitle" class="bubbly text-2xl text-slate-800 mb-2">Judul Kenangan</h3>
+              <p id="lightboxDesc" class="text-slate-600 text-sm leading-relaxed mb-4">Deskripsi kenangan...</p>
+            </div>
+
+            <!-- Bagian Komentar Cloud -->
+            <div class="border-t border-slate-100 pt-4">
+              <h4 class="font-bold text-sm text-slate-700 mb-2 flex items-center gap-1.5">
+                💬 Komentar Sobat (<span id="commentCount">0</span>)
+              </h4>
+              <div id="commentsList" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <p class="text-xs text-slate-400 italic">Belum ada komentar, jadilah yang pertama berkomentar! 🥰</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Input Komentar Baru & Action -->
+          <div class="pt-4 border-t border-slate-100 space-y-3 bg-white">
+            <div class="flex gap-2">
+              <input id="newCommentInput" type="text" placeholder="Tulis komentar seru kamu..." class="flex-grow border-2 border-slate-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-pink-300">
+              <button onclick="window.addCommentToMemory()" class="bg-pink-500 hover:bg-pink-600 text-white px-3.5 py-2 rounded-xl text-sm font-bold transition">Kirim</button>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="lightboxLikeBtn" class="flex-1 bg-rose-50 hover:bg-rose-100 py-2.5 rounded-2xl text-rose-500 font-bold transition flex items-center justify-center gap-1.5 text-sm">
+                <span class="text-lg">❤️</span> <span id="lightboxLikesCount">0</span> Likes
+              </button>
+              <button onclick="window.closeLightbox(null)" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-2xl font-bold transition text-sm">
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD MODAL -->
+  <div id="uploadModal" class="hidden fixed inset-0 z-50 modal bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl border-2 border-pink-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="bubbly text-3xl text-pink-500">Tambah Kenangan ✨</h2>
+        <button onclick="window.closeAddModal()" class="text-3xl font-bold text-slate-400 hover:text-slate-600 transition">&times;</button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- SELECT TIPE MEDIA (FOTO ATAU VIDEO) -->
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-2 block">Tipe Media Kenangan</label>
+          <div class="flex gap-4">
+            <label class="flex-1 bg-pink-50 hover:bg-pink-100 p-3 rounded-2xl border-2 border-pink-200 cursor-pointer flex items-center justify-center gap-2 transition">
+              <input type="radio" name="mediaType" value="image" checked onclick="window.toggleMediaType('image')" class="accent-pink-500 h-4 w-4">
+              <span class="font-bold text-sm text-pink-700">📸 Upload Foto</span>
+            </label>
+            <label class="flex-1 bg-purple-50 hover:bg-purple-100 p-3 rounded-2xl border-2 border-purple-200 cursor-pointer flex items-center justify-center gap-2 transition">
+              <input type="radio" name="mediaType" value="video" onclick="window.toggleMediaType('video')" class="accent-purple-500 h-4 w-4">
+              <span class="font-bold text-sm text-purple-700">🎬 Upload Video</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Judul Kenangan</label>
+          <input id="titleInput" type="text" placeholder="Misal: Selfie sebelum kuis mendadak" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Tanggal Kenangan</label>
+          <input id="dateInput" type="date" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Kategori</label>
+          <select id="categoryInput" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300 bg-white">
+            <option>Nugas</option>
+            <option>Wisuda</option>
+            <option>Makan</option>
+            <option>Random</option>
+          </select>
+        </div>
+
+        <!-- UPLOAD INPUT FOTO -->
+        <div id="imageInputContainer">
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Upload Foto Kenangan</label>
+          <input id="imageInput" type="file" accept="image/*" class="w-full border-2 border-dashed border-slate-200 rounded-2xl px-4 py-3 bg-slate-50 text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer">
+        </div>
+
+        <!-- UPLOAD INPUT VIDEO -->
+        <div id="videoInputContainer" class="hidden">
+          <label class="text-xs font-bold text-slate-500 mb-1 block font-semibold text-purple-700">Upload Video Kenangan (Maksimal 750 KB)</label>
+          <input id="videoInput" type="file" accept="video/*" class="w-full border-2 border-dashed border-purple-200 rounded-2xl px-4 py-3 bg-purple-50/30 text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer">
+          <p class="text-[10px] text-slate-500 mt-1.5 leading-relaxed bg-amber-50 border border-amber-200 p-2 rounded-xl">
+            ⚠️ <b>Tips Cloud Hemat:</b> Karena kapasitas cloud gratis terbatas, harap kompres video Anda menjadi resolusi rendah atau potong durasi menjadi sekitar 3-8 detik sebelum diunggah!
+          </p>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Cerita Lucu / Deskripsi</label>
+          <textarea id="descInput" placeholder="Ceritakan keseruan atau kejadian konyolnya..." rows="3" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-pink-300"></textarea>
+        </div>
+
+        <button id="submitMemoryBtn" onclick="window.addMemory()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white py-3.5 rounded-2xl font-bold bubbly text-lg shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all">
+          Simpan Kenangan ke Cloud 🚀
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MEMBER MODAL -->
+  <div id="editMemberModal" class="hidden fixed inset-0 z-50 modal bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border-2 border-sky-100">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="bubbly text-3xl text-sky-500">Edit Member 💖</h2>
+        <button onclick="window.closeEditMemberModal()" class="text-3xl font-bold text-slate-400 hover:text-slate-600 transition">&times;</button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Nama</label>
+          <input id="editMemberName" type="text" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-sky-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Tanggal Lahir</label>
+          <input id="editMemberBday" type="date" class="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 focus:outline-none focus:border-sky-300">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 mb-1 block">Upload Foto Profil (Opsional)</label>
+          <input id="editMemberPhoto" type="file" accept="image/*" class="w-full border-2 border-dashed border-slate-200 rounded-2xl px-4 py-3 bg-slate-50 text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer">
+          <p class="text-[10px] text-slate-400 mt-1">*Kosongkan jika tidak ingin mengubah foto</p>
+        </div>
+
+        <button id="submitEditMemberBtn" onclick="window.saveEditedMember()" class="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white py-3.5 rounded-2xl font-bold bubbly text-lg shadow-lg hover:scale-[1.02] transition-all">
+          Simpan Profil ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM ALERT/NOTIFICATION MODAL -->
+  <div id="customAlert" class="hidden fixed inset-0 z-[1000] bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-2 border-pink-100 animate-scaleIn">
+      <div id="alertIcon" class="text-5xl mb-3">💡</div>
+      <p id="alertMessage" class="text-slate-700 font-semibold text-lg mb-6">Pemberitahuan</p>
+      <button onclick="window.closeAlert()" class="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-3 rounded-2xl font-bold bubbly shadow-lg transition hover:brightness-110">
+        Oke, Mengerti!
+      </button>
+    </div>
+  </div>
+
+  <!-- CUSTOM CONFIRMATION MODAL -->
+  <div id="customConfirm" class="hidden fixed inset-0 z-[1000] bg-black/40 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-2 border-pink-100">
+      <div class="text-5xl mb-3">❓</div>
+      <p id="confirmMessage" class="text-slate-700 font-semibold text-lg mb-6">Apakah kamu yakin?</p>
+      <div class="flex gap-3">
+        <button id="confirmCancelBtn" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-2xl font-bold transition">
+          Batal
+        </button>
+        <button id="confirmOkBtn" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-bold transition">
+          Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIO ELEMENT UNTUK MUSIK BACKROUND -->
+  <audio id="bgMusic" loop></audio>
+
+  <!-- FIREBASE SCRIPTS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Konfigurasi Firebase dari akunmu
+    const firebaseConfig = {
+      apiKey: "AIzaSyDLRVp3fQCRnfIa1zG8O1Fru51IBNwrZCQ",
+      authDomain: "bbcmld2026.firebaseapp.com",
+      projectId: "bbcmld2026",
+      storageBucket: "bbcmld-memory-board.appspot.com",
+      messagingSenderId: "148762512345",
+      appId: "1:766401509044:web:6ee67d198521fbb2aec9e1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentFilter = 'all';
+    let currentEditMemberIndex = null;
+    let selectedMemoryIdForComments = null;
+
+    // Pagination variables
+    let currentPage = 1;
+    const itemsPerPage = 6;
+
+    // Database Cloud-synchronized Members, Memories & Videos Array
+    let members = [];
+    let memories = [];
+    let videos = [];
+    let currentComments = [];
+
+    // DATA PLAYLIST LAGU DARI BERKAS YANG DIUPLOAD
+    const playList = [
+      {
+        id: "hindia",
+        title: "Ramai Sepi Bersama",
+        artist: "Hindia",
+        src: "./Hindia - Ramai Sepi Bersama Official Lyric Video.mp3"
+      },
+      {
+        id: "with",
+        title: "With (Start Up OST)",
+        artist: "Kim Tae Ri, Nam Joo Hyuk, Bona, etc.",
+        src: "./[Easy Lyrics] Kim Tae Ri, Nam Joo Hyuk, Bona, Choi Hyun Wook, Lee Joo Myung - With.mp3"
+      },
+      {
+        id: "masamudaku",
+        title: "Masa Mudaku Habis",
+        artist: "Ghea Indrawari",
+        src: "./GHEA INDRAWARI - MASA MUDAKU HABIS LYRIC VIDEO LIRIK LAGU VIRAL & TRENDING TERBARU.mp3"
+      },
+      {
+        id: "wishyouwerehere",
+        title: "Wish You Were Here",
+        artist: "Neck Deep",
+        src: "./Wish You Were Here.mp3"
+      }
+    ];
+    let currentSongIndex = 0;
+
+    // Inisialisasi Audio source
+    const audioPlayer = document.getElementById('bgMusic');
+    audioPlayer.src = playList[currentSongIndex].src;
+
+    // SINKRONISASI REAL-TIME MEMBER DARI CLOUD FIRESTORE
+    onSnapshot(collection(db, "members"), (snapshot) => {
+      if (snapshot.empty) {
+        // Jika data member di cloud masih kosong, inisialisasi default 12 member awal
+        const defaultMembers = [
+          {name:'Arya',birthday:'2004-01-01'},
+          {name:'Akaz',birthday:'2004-02-02'},
+          {name:'Arip',birthday:'2004-03-03'},
+          {name:'Amad',birthday:'2004-04-04'},
+          {name:'Faqih',birthday:'2004-05-05'},
+          {name:'Feriska',birthday:'2004-06-06'},
+          {name:'Naiya',birthday:'2004-07-07'},
+          {name:'Yelira',birthday:'2004-08-08'},
+          {name:'Indah',birthday:'2004-09-09'},
+          {name:'Tyas',birthday:'2004-10-10'},
+          {name:'Elga',birthday:'2004-11-11'},
+          {name:'Lisa',birthday:'2004-12-12'}
+        ];
+        defaultMembers.forEach((m, idx) => {
+          setDoc(doc(db, "members", `member_${idx}`), m);
+        });
+      } else {
+        let tempMembers = [];
+        snapshot.forEach((docu) => {
+          tempMembers.push({ id: docu.id, ...docu.data() });
+        });
+        // Urutkan berdasarkan ID doc 'member_0' s/d 'member_11' agar posisinya stabil
+        tempMembers.sort((a, b) => {
+          const numA = parseInt(a.id.replace('member_', ''));
+          const numB = parseInt(b.id.replace('member_', ''));
+          return numA - numB;
+        });
+        members = tempMembers;
+        renderMembers();
+        updateSidebarProfile(); // Perbarui info profil di sidebar kiri
+      }
+    });
+
+    // MENGAMBIL DATA GALERI FOTO DARI CLOUD SECARA REALTIME
+    const qMemories = query(collection(db, "memories"), orderBy("date", "desc"));
+    onSnapshot(qMemories, (snapshot) => {
+      memories = [];
+      snapshot.forEach((docu) => {
+        memories.push({ id: docu.id, ...docu.data() });
+      });
+      renderGallery();
+      renderMarqueeSlider();
+    });
+
+    // MENGAMBIL DATA GALERI VIDEO DARI CLOUD SECARA REALTIME
+    const qVideos = query(collection(db, "videos"), orderBy("date", "desc"));
+    onSnapshot(qVideos, (snapshot) => {
+      videos = [];
+      snapshot.forEach((docu) => {
+        videos.push({ id: docu.id, ...docu.data() });
+      });
+      renderVideos();
+    });
+
+    // LISTEN DATA KOMENTAR PADA MEMORY TERPILIH
+    function listenToComments(memoryId) {
+      const qComments = query(collection(db, `memories/${memoryId}/comments`), orderBy("timestamp", "asc"));
+      return onSnapshot(qComments, (snapshot) => {
+        currentComments = [];
+        snapshot.forEach((docu) => {
+          currentComments.push({ id: docu.id, ...docu.data() });
+        });
+        renderComments();
+      });
+    }
+
+    // FUNGSI RENDER MEMBERS (Mendukung filter nama per session login)
+    function renderMembers() {
+      const container = document.getElementById('memberContainer');
+      const header = document.getElementById('memberHeader');
+      const section = document.getElementById('membersSection');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const loggedInUser = localStorage.getItem('bbcmld_user') || '';
+      const isAdmin = localStorage.getItem('bbcmld_role') === 'admin';
+
+      let filteredMembers = members;
+
+      // Jika login personal (bukan admin), sembunyikan section 12 member agar berfokus hanya di sidebar
+      if (!isAdmin && loggedInUser) {
+        section.classList.add('hidden');
+        document.getElementById('memberCount').innerText = "1";
+        return;
+      } else {
+        section.classList.remove('hidden');
+      }
+
+      header.innerHTML = `12 Member BBCmld ✨`;
+      document.getElementById('memberCount').innerText = members.length;
+
+      filteredMembers.forEach((m) => {
+        const origIndex = members.findIndex(mem => mem.id === m.id);
+        const avatarSrc = m.image ? m.image : `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${m.name}`;
+        
+        container.innerHTML += `
+          <div class="bg-white/80 rounded-3xl p-4 shadow-lg text-center border border-white/60 hover:-translate-y-1 transition duration-200 mx-auto w-full max-w-[200px]">
+            <img src="${avatarSrc}" class="w-16 h-16 mx-auto mb-3 rounded-full bg-pink-50 p-1 object-cover shadow">
+            <h3 class="font-bold bubbly text-lg text-pink-600">${m.name}</h3>
+            <p class="text-[10px] text-slate-500 mt-1">🎂 ${m.birthday || '-'}</p>
+            <button onclick="window.editMember(${origIndex})" class="mt-3 bg-sky-100 hover:bg-sky-200 text-sky-600 px-3 py-1 rounded-xl text-xs font-bold transition">Edit</button>
+          </div>
+        `;
+      });
+    }
+
+    // FUNGSI PERBARUI DETAIL PROFIL PADA SIDEBAR KIRI
+    function updateSidebarProfile() {
+      const loggedInUser = localStorage.getItem('bbcmld_user') || 'Admin';
+      const isAdmin = localStorage.getItem('bbcmld_role') === 'admin';
+
+      const avatarImg = document.getElementById('sidebarUserAvatar');
+      const nameTxt = document.getElementById('sidebarUserName');
+      const bdayTxt = document.getElementById('sidebarUserBday');
+      const badgeTxt = document.getElementById('sidebarBadge');
+      const editBtn = document.getElementById('sidebarEditProfileBtn');
+
+      if (isAdmin) {
+        avatarImg.src = `https://api.dicebear.com/7.x/fun-emoji/svg?seed=Admin`;
+        nameTxt.innerText = "Admin Utama";
+        bdayTxt.innerText = "🎂 Selalu Muda";
+        badgeTxt.innerText = "👑 Admin BBCmld";
+        badgeTxt.className = "mt-2 text-[10px] bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-bold shadow-sm";
+        editBtn.style.display = 'none'; // Admin utama tidak perlu edit profil dummy
+      } else {
+        const userObj = members.find(m => m.name.toLowerCase() === loggedInUser.toLowerCase());
+        if (userObj) {
+          avatarImg.src = userObj.image ? userObj.image : `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${userObj.name}`;
+          nameTxt.innerText = userObj.name;
+          bdayTxt.innerText = `🎂 ${userObj.birthday || '-'}`;
+          badgeTxt.innerText = "💖 Sobat Cumlod";
+          badgeTxt.className = "mt-2 text-[10px] bg-pink-100 text-pink-700 px-3 py-1 rounded-full font-bold shadow-sm";
+          
+          editBtn.style.display = 'block';
+          const origIndex = members.findIndex(mem => mem.id === userObj.id);
+          editBtn.onclick = () => window.editMember(origIndex);
+        }
+      }
+    }
+
+    // FUNGSI RENDER GALERI FOTO DARI CLOUD (Dengan sistem pagination)
+    function renderGallery() {
+      const gallery = document.getElementById('gallery');
+      if (!gallery) return;
+      gallery.innerHTML = '';
+
+      const filtered = currentFilter === 'all'
+        ? memories
+        : memories.filter(m => m.category === currentFilter);
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+      // Cek agar currentPage tidak di luar batas sesudah filter diubah
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = totalPages;
+      }
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedItems = filtered.slice(startIndex, endIndex);
+
+      paginatedItems.forEach((item) => {
+        gallery.innerHTML += `
+          <div class="card bg-white rounded-3xl shadow-xl overflow-hidden p-4 flex flex-col justify-between border border-white">
+            <div onclick="window.openLightbox('${item.id}')" class="cursor-pointer group relative overflow-hidden rounded-2xl">
+              <img src="${item.image}" class="w-full h-72 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300 animate-fadeIn" />
+              <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span class="bg-white/90 text-slate-800 font-bold px-4 py-2 rounded-full text-xs shadow-md">Lihat Foto & Komen 💬</span>
+              </div>
+            </div>
+            <div class="mt-4 flex-grow flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] bg-pink-100 text-pink-600 px-2.5 py-1 rounded-full font-bold">${item.category}</span>
+                <h3 onclick="window.openLightbox('${item.id}')" class="bubbly text-xl mt-3 text-slate-800 cursor-pointer hover:text-pink-500 transition-colors truncate">${item.title}</h3>
+                <p class="text-xs text-slate-500 mt-2 line-clamp-2">${item.desc}</p>
+                <p class="text-[10px] text-slate-400 mt-2">📅 ${item.date}</p>
+              </div>
+              <div class="flex gap-2 mt-5">
+                <button onclick="window.likeMemory('${item.id}', ${item.likes}, event)" class="flex-grow bg-rose-50 hover:bg-rose-100 active:scale-95 py-2.5 rounded-2xl text-rose-500 font-bold transition flex items-center justify-center gap-1 text-xs">
+                  ❤️ <span>${item.likes}</span>
+                </button>
+                <button onclick="window.deleteMemory('${item.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 px-3.5 rounded-2xl font-bold text-xs transition">
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      renderPaginationControls(totalPages);
+      updateStats();
+    }
+
+    // FUNGSI MEMBUAT PAGINATION CONTROLLER YANG LUCU
+    function renderPaginationControls(totalPages) {
+      const container = document.getElementById('paginationContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (totalPages <= 1) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+
+      // Tombol Previous
+      const prevDisabled = currentPage === 1;
+      container.innerHTML += `
+        <button onclick="window.changePage(${currentPage - 1})" ${prevDisabled ? 'disabled' : ''} class="px-3 py-2 rounded-xl text-xs font-bold transition-all ${prevDisabled ? 'bg-white/30 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-700 hover:bg-pink-100 active:scale-95 shadow-sm'}">
+          ◀ Prev
+        </button>
+      `;
+
+      // Angka Halaman
+      for (let i = 1; i <= totalPages; i++) {
+        const isCurrent = i === currentPage;
+        container.innerHTML += `
+          <button onclick="window.changePage(${i})" class="w-8 h-8 rounded-xl text-xs font-bold transition-all flex items-center justify-center ${isCurrent ? 'bg-pink-500 text-white shadow-md scale-105' : 'bg-white text-slate-700 hover:bg-pink-100 active:scale-95 shadow-sm'}">
+            ${i}
+          </button>
+        `;
+      }
+
+      // Tombol Next
+      const nextDisabled = currentPage === totalPages;
+      container.innerHTML += `
+        <button onclick="window.changePage(${currentPage + 1})" ${nextDisabled ? 'disabled' : ''} class="px-3 py-2 rounded-xl text-xs font-bold transition-all ${nextDisabled ? 'bg-white/30 text-slate-400 cursor-not-allowed' : 'bg-white text-slate-700 hover:bg-pink-100 active:scale-95 shadow-sm'}">
+          Next ▶
+        </button>
+      `;
+    }
+
+    window.changePage = (page) => {
+      currentPage = page;
+      renderGallery();
+      // Scroll perlahan ke atas galeri
+      const galleryElement = document.getElementById('gallery');
+      if (galleryElement) {
+        galleryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    // FUNGSI RENDER GALERI VIDEO REAL-TIME DARI CLOUD
+    function renderVideos() {
+      const videoContainer = document.getElementById('videoContainer');
+      if (!videoContainer) return;
+      videoContainer.innerHTML = '';
+
+      if (videos.length === 0) {
+        videoContainer.innerHTML = `
+          <div class="col-span-2 text-center py-12">
+            <span class="text-4xl">🎬</span>
+            <p class="text-slate-500 font-semibold mt-2 text-xs">Belum ada video kenangan. Yuk abadikan video keseruan kalian dengan klik tombol Upload! ✨</p>
+          </div>
+        `;
+        return;
+      }
+
+      videos.forEach((item) => {
+        videoContainer.innerHTML += `
+          <div class="overflow-hidden rounded-3xl shadow-xl bg-white p-4 flex flex-col justify-between border border-slate-100 transition-all duration-300 hover:shadow-2xl">
+            <div class="relative overflow-hidden rounded-2xl bg-black h-80 flex items-center justify-center">
+              <video src="${item.video}" controls class="w-full h-full object-contain rounded-2xl bg-black"></video>
+            </div>
+            <div class="mt-4 flex-grow flex flex-col justify-between">
+              <div>
+                <span class="text-[10px] bg-purple-100 text-purple-600 px-2.5 py-1 rounded-full font-bold">${item.category || 'Random'}</span>
+                <h3 class="bubbly text-xl mt-3 text-slate-800 truncate">${item.title}</h3>
+                <p class="text-xs text-slate-600 mt-2 line-clamp-3">${item.desc || 'Tidak ada cerita tambahan.'}</p>
+                <p class="text-[10px] text-slate-400 mt-2">📅 ${item.date}</p>
+              </div>
+              <div class="flex gap-2 mt-5">
+                <button onclick="window.likeVideo('${item.id}', ${item.likes}, event)" class="flex-1 bg-rose-50 hover:bg-rose-100 active:scale-95 py-2.5 rounded-2xl text-rose-500 font-bold transition flex items-center justify-center gap-1 text-xs">
+                  ❤️ <span>${item.likes}</span>
+                </button>
+                <button onclick="window.deleteVideo('${item.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 px-4 rounded-2xl font-bold text-xs transition">
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // FUNGSI RENDER MARQUEE SLIDER (BERGULIR KANAN KE KIRI)
+    function renderMarqueeSlider() {
+      const marqueeContainer = document.getElementById('marqueeContainer');
+      if (!marqueeContainer) return;
+      if (memories.length === 0) {
+        marqueeContainer.innerHTML = '<div class="text-slate-500 font-semibold py-6 text-center w-full text-xs">Belum ada foto kenangan. Klik tombol Upload untuk menambahkan! 📸</div>';
+        return;
+      }
+
+      let itemsHTML = '';
+      memories.forEach((item) => {
+        itemsHTML += `
+          <div onclick="window.openLightbox('${item.id}')" class="w-48 h-32 flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl border-2 border-white shadow-md hover:scale-105 hover:border-pink-300 transition duration-300 relative group">
+            <img src="${item.image}" class="w-full h-full object-cover rounded-2xl" alt="${item.title}" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2 flex items-end">
+              <span class="text-white text-[10px] font-bold truncate block w-full">${item.title}</span>
+            </div>
+          </div>
+        `;
+      });
+
+      // Duplikat konten agar loop berputar mulus tanpa patah
+      marqueeContainer.innerHTML = itemsHTML + itemsHTML;
+    }
+
+    // FUNGSI UPDATE STATS (LIKE & POSTS CLOUD)
+    function updateStats() {
+      document.getElementById('memoryCount').innerText = memories.length + videos.length;
+      let totalLikes = memories.reduce((a, b) => a + (b.likes || 0), 0) + videos.reduce((a, b) => a + (b.likes || 0), 0);
+      document.getElementById('likeCount').innerText = totalLikes;
+    }
+
+    // TOGGLE JENIS MEDIA DI MODAL UPLOAD
+    window.toggleMediaType = (type) => {
+      const imgContainer = document.getElementById('imageInputContainer');
+      const vidContainer = document.getElementById('videoInputContainer');
+      if (type === 'image') {
+        imgContainer.classList.remove('hidden');
+        vidContainer.classList.add('hidden');
+      } else {
+        imgContainer.classList.add('hidden');
+        vidContainer.classList.remove('hidden');
+      }
+    };
+
+    // FUNGSI TAMBAH KE CLOUD
+    window.addMemory = async () => {
+      const title = document.getElementById('titleInput').value.trim();
+      const date = document.getElementById('dateInput').value;
+      const category = document.getElementById('categoryInput').value;
+      const desc = document.getElementById('descInput').value.trim();
+      const mediaType = document.querySelector('input[name="mediaType"]:checked').value;
+      
+      const submitBtn = document.getElementById('submitMemoryBtn');
+
+      if(!title) return window.showAlert('Silakan tulis judul kenangannya dulu ya! 🥺', '✏️');
+      if(!date) return window.showAlert('Jangan lupa masukkan tanggal momen tersebut! 📅', '📅');
+
+      if (mediaType === 'image') {
+        const imageFile = document.getElementById('imageInput').files[0];
+        if(!imageFile) return window.showAlert('Upload foto dulu ya biar kenangannya abadi! 📸', '😭');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Mengompres & Mengunggah Foto... ⏳';
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = async function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800; 
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+            try {
+              await addDoc(collection(db, "memories"), {
+                title, date, category, image: compressedBase64, desc: desc || 'Tidak ada deskripsi tambahan.', likes: 0
+              });
+              window.closeAddModal();
+              window.showAlert('Foto kenangan baru berhasil disimpan ke Cloud! 🎉', '🚀');
+              resetUploadForm();
+            } catch (error) {
+              console.error("Gagal mengupload: ", error);
+              window.showAlert('Gagal menyimpan kenangan, coba lagi ya! 😢', '❌');
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = 'Simpan Kenangan ke Cloud 🚀';
+            }
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(imageFile);
+
+      } else {
+        const videoFile = document.getElementById('videoInput').files[0];
+        if(!videoFile) return window.showAlert('Pilih file video yang ingin diupload! 🎬', '😭');
+
+        if (videoFile.size > 750 * 1024) {
+          return window.showAlert('Ukuran video terlalu besar (Maksimal 750 KB)! Firestore cloud gratis memiliki limit 1MB per berkas. Yuk, potong durasinya menjadi 3-8 detik atau gunakan resolusi rendah terlebih dahulu! 🥺', '⚠️');
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Mengunggah Video ke Cloud... ⏳';
+
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+          try {
+            await addDoc(collection(db, "videos"), {
+              title, date, category, video: event.target.result, desc: desc || 'Tidak ada deskripsi tambahan.', likes: 0
+            });
+            window.closeAddModal();
+            window.showAlert('Video kenangan berhasil disimpan ke Cloud! 🎉', '🚀');
+            resetUploadForm();
+          } catch (error) {
+            console.error("Gagal mengupload video: ", error);
+            window.showAlert('Gagal menyimpan video ke Cloud! 😢', '❌');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Simpan Kenangan ke Cloud 🚀';
+          }
+        };
+        reader.readAsDataURL(videoFile);
+      }
+    };
+
+    function resetUploadForm() {
+      document.getElementById('titleInput').value = '';
+      document.getElementById('dateInput').value = '';
+      document.getElementById('imageInput').value = '';
+      document.getElementById('videoInput').value = '';
+      document.getElementById('descInput').value = '';
+    }
+
+    // FUNGSI LIKE FOTO DI CLOUD
+    window.likeMemory = async (id, currentLikes, event) => {
+      if(event && event.clientX) window.createFloatingHearts(event.clientX, event.clientY);
+      await updateDoc(doc(db, "memories", id), { likes: currentLikes + 1 });
+      const activeLightboxId = selectedMemoryIdForComments;
+      if (activeLightboxId === id) {
+        document.getElementById('lightboxLikesCount').innerText = currentLikes + 1;
+      }
+    };
+
+    // FUNGSI HAPUS FOTO DI CLOUD
+    window.deleteMemory = (id) => {
+      window.showConfirm('Hapus kenangan berharga ini? 😭 Semua member akan kehilangannya.', async () => {
+        await deleteDoc(doc(db, "memories", id));
+        window.showAlert('Kenangan berhasil dihapus dari Cloud.', '🗑️');
+      });
+    };
+
+    // FUNGSI LIKE VIDEO DI CLOUD
+    window.likeVideo = async (id, currentLikes, event) => {
+      if(event && event.clientX) window.createFloatingHearts(event.clientX, event.clientY);
+      await updateDoc(doc(db, "videos", id), { likes: currentLikes + 1 });
+    };
+
+    // FUNGSI HAPUS VIDEO DI CLOUD
+    window.deleteVideo = (id) => {
+      window.showConfirm('Hapus video memori ini? 😭 Semua member akan kehilangannya di dashboard.', async () => {
+        await deleteDoc(doc(db, "videos", id));
+        window.showAlert('Video kenangan berhasil dihapus dari Cloud.', '🗑️');
+      });
+    };
+
+    // FUNGSI LIGHTBOX (FOTO + KOMENTAR REALTIME)
+    let unsubscribeComments = null;
+
+    window.openLightbox = (id) => {
+      const item = memories.find(m => m.id === id);
+      if (!item) return;
+
+      selectedMemoryIdForComments = id;
+
+      document.getElementById('lightboxImage').src = item.image;
+      document.getElementById('lightboxCategory').innerText = item.category;
+      document.getElementById('lightboxDate').innerText = "📅 " + item.date;
+      document.getElementById('lightboxTitle').innerText = item.title;
+      document.getElementById('lightboxDesc').innerText = item.desc;
+      document.getElementById('lightboxLikesCount').innerText = item.likes;
+      
+      const likeBtn = document.getElementById('lightboxLikeBtn');
+      likeBtn.onclick = function(event) {
+        window.likeMemory(id, item.likes, event);
+      };
+
+      if (unsubscribeComments) {
+        unsubscribeComments();
+      }
+
+      unsubscribeComments = listenToComments(id);
+
+      document.getElementById('lightboxModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeLightbox = (event) => {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('lightboxModal').classList.add('hidden');
+      document.body.style.overflow = '';
+      selectedMemoryIdForComments = null;
+      if (unsubscribeComments) {
+        unsubscribeComments();
+        unsubscribeComments = null;
+      }
+    };
+
+    // FUNGSI TAMBAH KOMENTAR BARU KE FIRESTORE
+    window.addCommentToMemory = async () => {
+      const textInput = document.getElementById('newCommentInput');
+      const text = textInput.value.trim();
+      if (!text) return;
+
+      const userName = localStorage.getItem('bbcmld_user') || 'Sobat BBCmld';
+
+      if (!selectedMemoryIdForComments) return;
+
+      try {
+        await addDoc(collection(db, `memories/${selectedMemoryIdForComments}/comments`), {
+          author: userName,
+          text: text,
+          timestamp: Date.now()
+        });
+        textInput.value = '';
+      } catch (err) {
+        console.error("Gagal mengirim komentar: ", err);
+        window.showAlert('Gagal mengirim komentar, coba lagi! 😢', '❌');
+      }
+    };
+
+    // FUNGSI RENDER LIST KOMENTAR
+    function renderComments() {
+      const commentsList = document.getElementById('commentsList');
+      const commentCount = document.getElementById('commentCount');
+      if (!commentsList) return;
+
+      commentCount.innerText = currentComments.length;
+
+      if (currentComments.length === 0) {
+        commentsList.innerHTML = `<p class="text-xs text-slate-400 italic py-2">Belum ada komentar. Yuk obrolin momen lucu ini! 💬</p>`;
+        return;
+      }
+
+      commentsList.innerHTML = '';
+      currentComments.forEach(c => {
+        const authorBadge = c.author === 'Admin' ? '👑 Admin' : `💖 ${c.author}`;
+        commentsList.innerHTML += `
+          <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 text-xs text-slate-700 animate-fadeIn">
+            <div class="flex items-center justify-between font-bold text-pink-600 mb-1">
+              <span>${authorBadge}</span>
+            </div>
+            <p class="leading-relaxed font-medium">${c.text}</p>
+          </div>
+        `;
+      });
+
+      commentsList.scrollTop = commentsList.scrollHeight;
+    }
+
+    // UI & HELPER FUNCTIONS
+    window.showAlert = (message, icon = "💡") => {
+      document.getElementById('alertIcon').innerText = icon;
+      document.getElementById('alertMessage').innerText = message;
+      document.getElementById('customAlert').classList.remove('hidden');
+    };
+
+    window.closeAlert = () => document.getElementById('customAlert').classList.add('hidden');
+
+    window.showConfirm = (message, onConfirm) => {
+      document.getElementById('confirmMessage').innerText = message;
+      document.getElementById('customConfirm').classList.remove('hidden');
+      
+      const okBtn = document.getElementById('confirmOkBtn');
+      const cancelBtn = document.getElementById('confirmCancelBtn');
+
+      const newOkBtn = okBtn.cloneNode(true);
+      const newCancelBtn = cancelBtn.cloneNode(true);
+      okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+      cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+      newOkBtn.addEventListener('click', () => {
+        document.getElementById('customConfirm').classList.add('hidden');
+        onConfirm();
+      }, { once: true });
+
+      newCancelBtn.addEventListener('click', () => {
+        document.getElementById('customConfirm').classList.add('hidden');
+      }, { once: true });
+    };
+
+    window.createFloatingHearts = (x, y) => {
+      const heartEmojis = ['❤️', '💖', '✨', '💕', '🥰'];
+      for (let i = 0; i < 6; i++) {
+        const heart = document.createElement('div');
+        heart.innerHTML = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+        heart.className = 'floating-heart';
+        const randomX = (Math.random() - 0.5) * 60; 
+        const randomY = (Math.random() - 0.5) * 60;
+        heart.style.left = (x + randomX - 20) + 'px';
+        heart.style.top = (y + randomY - 20) + 'px';
+        heart.style.animationDuration = (0.8 + Math.random() * 0.5) + 's';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1500);
+      }
+    };
+
+    // EDIT MEMBERS (SINKRON KE FIRESTORE)
+    window.editMember = (index) => {
+      currentEditMemberIndex = index;
+      const m = members[index];
+      document.getElementById('editMemberName').value = m.name;
+      document.getElementById('editMemberBday').value = m.birthday || '';
+      document.getElementById('editMemberPhoto').value = ''; 
+      document.getElementById('editMemberModal').classList.remove('hidden');
+    };
+
+    window.closeEditMemberModal = () => document.getElementById('editMemberModal').classList.add('hidden');
+
+    window.saveEditedMember = async () => {
+      const name = document.getElementById('editMemberName').value.trim();
+      const bday = document.getElementById('editMemberBday').value;
+      const file = document.getElementById('editMemberPhoto').files[0];
+      const editSubmitBtn = document.getElementById('submitEditMemberBtn');
+
+      if (!name) return window.showAlert('Nama tidak boleh kosong! 🥺', '❌');
+
+      editSubmitBtn.disabled = true;
+      editSubmitBtn.innerHTML = 'Menyimpan Profil... ⏳';
+
+      const docId = `member_${currentEditMemberIndex}`;
+
+      const updateProfileData = async (photoBase64 = null) => {
+        try {
+          const updateData = { name, birthday: bday };
+          if (photoBase64) {
+            updateData.image = photoBase64;
+          }
+          await updateDoc(doc(db, "members", docId), updateData);
+          window.closeEditMemberModal();
+          window.showAlert('Profil member berhasil diperbarui di Cloud! ✨', '😎');
+          updateSidebarProfile(); // Langsung perbarui sidebar kiri
+        } catch (error) {
+          console.error("Gagal mengupdate profil: ", error);
+          window.showAlert('Gagal memperbarui profil di Cloud! 😢', '❌');
+        } finally {
+          editSubmitBtn.disabled = false;
+          editSubmitBtn.innerHTML = 'Simpan Profil ✨';
+        }
+      };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 250; 
+            let width = img.width;
+            let height = img.height;
+
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const compressedProfileBase64 = canvas.toDataURL('image/jpeg', 0.8);
+            updateProfileData(compressedProfileBase64);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        updateProfileData();
+      }
+    };
+
+    window.filterGallery = (category) => {
+      currentFilter = category;
+      currentPage = 1; // Reset halaman ke 1 setiap kali filter kategori diganti
+      document.querySelectorAll('.filterBtn').forEach(btn => {
+        if(btn.innerText.includes(category) || (category === 'all' && btn.innerText.includes('Semua'))) {
+          btn.classList.remove('bg-white', 'text-slate-800');
+          btn.classList.add('bg-pink-500', 'text-white');
+        } else {
+          btn.classList.remove('bg-pink-500', 'text-white');
+          btn.classList.add('bg-white', 'text-slate-800');
+        }
+      });
+      renderGallery();
+    };
+
+    window.openAddModal = () => {
+      const dateInput = document.getElementById('dateInput');
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+      
+      const imgRadio = document.querySelector('input[name="mediaType"][value="image"]');
+      if (imgRadio) imgRadio.checked = true;
+      window.toggleMediaType('image');
+      
+      document.getElementById('uploadModal').classList.remove('hidden');
+    };
+
+    window.closeAddModal = () => document.getElementById('uploadModal').classList.add('hidden');
+
+    // FUNGSI INTERAKTIF BUKA TUTUP SIDEBAR (Desktop & Mobile)
+    window.toggleSidebar = () => {
+      const sidebar = document.getElementById('sidebarPanel');
+      const mainContent = document.getElementById('mainContent');
+      const isMobile = window.innerWidth < 1024;
+
+      if (sidebar.classList.contains('-translate-x-full')) {
+        // Buka Sidebar
+        sidebar.classList.remove('-translate-x-full');
+        if (!isMobile) {
+          mainContent.classList.add('lg:pl-80');
+          localStorage.setItem('bbcmld_sidebar_open', 'true');
+        }
+      } else {
+        // Tutup Sidebar
+        sidebar.classList.add('-translate-x-full');
+        if (!isMobile) {
+          mainContent.classList.remove('lg:pl-80');
+          localStorage.setItem('bbcmld_sidebar_open', 'false');
+        }
+      }
+      updateSidebarTriggerBtnVisibility();
+    };
+
+    function updateSidebarTriggerBtnVisibility() {
+      const sidebar = document.getElementById('sidebarPanel');
+      const triggerBtn = document.getElementById('sidebarTriggerBtn');
+      const isMobile = window.innerWidth < 1024;
+
+      if (isMobile) {
+        // Di mobile, floating button tidak diperlukan karena sudah ada hamburger menu di header
+        triggerBtn.classList.add('scale-0', 'opacity-0', 'pointer-events-none');
+        return;
+      }
+
+      if (sidebar.classList.contains('-translate-x-full')) {
+        // Jika tertutup di desktop, tampilkan floating button
+        triggerBtn.classList.remove('scale-0', 'opacity-0', 'pointer-events-none');
+      } else {
+        // Jika terbuka di desktop, sembunyikan floating button
+        triggerBtn.classList.add('scale-0', 'opacity-0', 'pointer-events-none');
+      }
+    }
+
+    // Selalu pantau perubahan ukuran layar agar tombol sidebar trigger sinkron
+    window.addEventListener('resize', () => {
+      const sidebar = document.getElementById('sidebarPanel');
+      const mainContent = document.getElementById('mainContent');
+      const isMobile = window.innerWidth < 1024;
+
+      if (isMobile) {
+        mainContent.classList.remove('lg:pl-80');
+        sidebar.classList.add('-translate-x-full');
+      } else {
+        const wasOpen = localStorage.getItem('bbcmld_sidebar_open') !== 'false';
+        if (wasOpen) {
+          sidebar.classList.remove('-translate-x-full');
+          mainContent.classList.add('lg:pl-80');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          mainContent.classList.remove('lg:pl-80');
+        }
+      }
+      updateSidebarTriggerBtnVisibility();
+    });
+
+    // FUNGSI MULTI-LAGU PLAYLIST MUSIC PLAYER
+    window.togglePlaylistDropdown = () => {
+      const dropdown = document.getElementById('playlistDropdown');
+      dropdown.classList.toggle('hidden');
+    };
+
+    window.renderPlaylistDropdown = () => {
+      const container = document.getElementById('songListContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      playList.forEach((song, idx) => {
+        const isCurrent = idx === currentSongIndex;
+        container.innerHTML += `
+          <button onclick="window.selectSong(${idx})" class="w-full text-left px-3 py-2 rounded-xl text-[11px] flex justify-between items-center transition ${isCurrent ? 'bg-pink-100 text-pink-600 font-bold' : 'hover:bg-pink-50/50 text-slate-700'}">
+            <div class="truncate pr-2">
+              <p class="truncate font-semibold">${song.title}</p>
+              <p class="text-[9px] text-slate-400 font-normal truncate">${song.artist}</p>
+            </div>
+            <span>${isCurrent && !audioPlayer.paused ? '🔊' : '🎵'}</span>
+          </button>
+        `;
+      });
+    };
+
+    window.selectSong = (index) => {
+      const isPlaying = !audioPlayer.paused;
+      currentSongIndex = index;
+      audioPlayer.src = playList[index].src;
+      
+      document.getElementById('currentSongTitle').innerText = `${playList[index].title} - ${playList[index].artist}`;
+      window.renderPlaylistDropdown();
+
+      const cdIcon = document.getElementById('musicDiscIcon');
+
+      if (isPlaying) {
+        audioPlayer.play().catch(err => console.log("Gagal auto play", err));
+        document.getElementById('musicBtn').innerHTML = '<span>⏸</span> Pause';
+        cdIcon.classList.remove('paused-cd');
+      } else {
+        audioPlayer.play().then(() => {
+          document.getElementById('musicBtn').innerHTML = '<span>⏸</span> Pause';
+          cdIcon.classList.remove('paused-cd');
+          window.renderPlaylistDropdown();
+        }).catch(err => console.log(err));
+      }
+    };
+
+    window.toggleMusic = () => {
+      const music = document.getElementById('bgMusic');
+      const btn = document.getElementById('musicBtn');
+      const cdIcon = document.getElementById('musicDiscIcon');
+      if(music.paused){
+        music.play().then(() => { 
+          btn.innerHTML = '<span>⏸</span> Pause'; 
+          cdIcon.classList.remove('paused-cd');
+          document.getElementById('currentSongTitle').innerText = `${playList[currentSongIndex].title} - ${playList[currentSongIndex].artist}`;
+          window.renderPlaylistDropdown();
+        })
+        .catch(err => window.showAlert('Interaksi pertama diperlukan agar browser dapat memutar audio.', '🎵'));
+      } else {
+        music.pause();
+        btn.innerHTML = '<span>▶</span> Putar';
+        cdIcon.classList.add('paused-cd');
+        window.renderPlaylistDropdown();
+      }
+    };
+
+    audioPlayer.onended = () => {
+      let nextIndex = (currentSongIndex + 1) % playList.length;
+      window.selectSong(nextIndex);
+      audioPlayer.play().catch(err => console.log(err));
+    };
+
+    window.scrollToVideo = () => {
+      const section = document.getElementById('videoSection');
+      section.scrollIntoView({behavior:'smooth'});
+      // Tutup drawer di mobile kalau klik scroll video
+      if (window.innerWidth < 1024) {
+        document.getElementById('sidebarPanel').classList.add('hidden');
+      }
+    };
+
+    // DAFTAR ANGGOTA UTK COCOK KAN PASSCODE PERSONAL
+    const registeredNames = ['arya', 'akaz', 'arip', 'amad', 'faqih', 'feriska', 'naiya', 'yelira', 'indah', 'tyas', 'elga', 'lisa'];
+
+    // FUNGSI LOGIN DENGAN NAMA ATAU ADMIN
+    window.loginAccess = () => {
+      const pass = document.getElementById('passcodeInput').value.trim().toLowerCase();
+      
+      if (pass === 'bbcmld2026') {
+        localStorage.setItem('bbcmld_logged_in', 'true');
+        localStorage.setItem('bbcmld_user', 'Admin');
+        localStorage.setItem('bbcmld_role', 'admin');
+        
+        enterDashboard('Admin');
+      } else {
+        let matched = false;
+        for (let name of registeredNames) {
+          const personalPass = name + '2026';
+          if (pass === personalPass) {
+            const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+            localStorage.setItem('bbcmld_logged_in', 'true');
+            localStorage.setItem('bbcmld_user', formattedName);
+            localStorage.setItem('bbcmld_role', 'member');
+            
+            enterDashboard(formattedName);
+            matched = true;
+            break;
+          }
+        }
+
+        if (!matched) {
+          window.showAlert('Passcode salah! Gunakan "bbcmld2026" atau format "[nama]2026" (contoh: tyas2026)', '🔒');
+        }
+      }
+    };
+
+    function enterDashboard(displayName) {
+      document.getElementById('loginScreen').style.opacity = '0';
+      setTimeout(() => { 
+        document.getElementById('loginScreen').style.display = 'none'; 
+      }, 300);
+
+      // Perbarui mobile greeting
+      document.getElementById('mobileUserGreeting').innerText = `Halo, ${displayName}! 💖`;
+      
+      renderMembers();
+      updateSidebarProfile();
+
+      setTimeout(() => window.toggleMusic(), 500);
+    }
+
+    // FUNGSI LOGOUT
+    window.logoutAccess = () => {
+      window.showConfirm('Yakin ingin keluar dari dashboard?', () => {
+        localStorage.removeItem('bbcmld_logged_in');
+        localStorage.removeItem('bbcmld_user');
+        localStorage.removeItem('bbcmld_role');
+        
+        const music = document.getElementById('bgMusic');
+        music.pause();
+        document.getElementById('musicBtn').innerHTML = '<span>▶</span> Putar';
+        document.getElementById('musicDiscIcon').classList.add('paused-cd');
+
+        document.getElementById('passcodeInput').value = '';
+        document.getElementById('loginScreen').style.display = 'flex';
+        setTimeout(() => { document.getElementById('loginScreen').style.opacity = '1'; }, 50);
+        
+        // Sembunyikan sidebar di mobile jika terbuka
+        if (window.innerWidth < 1024) {
+          document.getElementById('sidebarPanel').classList.add('-translate-x-full');
+        }
+      });
+    };
+
+    window.handleEnter = (event) => { if(event.key === 'Enter') window.loginAccess(); };
+
+    // WINDOW LOAD SETUP
+    window.onload = () => {
+      const isLoggedIn = localStorage.getItem('bbcmld_logged_in') === 'true';
+      const isMobile = window.innerWidth < 1024;
+      
+      const sidebar = document.getElementById('sidebarPanel');
+      const mainContent = document.getElementById('mainContent');
+
+      // Setup inisialisasi keadaan sidebar awal
+      if (isMobile) {
+        sidebar.classList.add('-translate-x-full');
+        mainContent.classList.remove('lg:pl-80');
+      } else {
+        const wasSidebarOpen = localStorage.getItem('bbcmld_sidebar_open') !== 'false';
+        if (wasSidebarOpen) {
+          sidebar.classList.remove('-translate-x-full');
+          mainContent.classList.add('lg:pl-80');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          mainContent.classList.remove('lg:pl-80');
+        }
+      }
+
+      updateSidebarTriggerBtnVisibility();
+
+      if (isLoggedIn) {
+        const displayName = localStorage.getItem('bbcmld_user') || 'Admin';
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mobileUserGreeting').innerText = `Halo, ${displayName}! 💖`;
+        updateSidebarProfile();
+      }
+      
+      window.renderPlaylistDropdown();
+      document.getElementById('currentSongTitle').innerText = `${playList[currentSongIndex].title} - ${playList[currentSongIndex].artist}`;
+    };
+
+  </script>
+</body>
+</html>
